@@ -1,3 +1,7 @@
+# GormJourney
+Experimenting with GORM in real-world scenarios, exploring its features, and documenting the learning process. 
+（在真实场景中实验 GORM，探索其特性，并记录学习过程。）
+
 # GORM
 
 The fantastic ORM library for Golang, aims to be developer friendly.
