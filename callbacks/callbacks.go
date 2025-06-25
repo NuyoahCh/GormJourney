@@ -19,6 +19,7 @@ type Config struct {
 	DeleteClauses        []string
 }
 
+// 注册默认回调。
 func RegisterDefaultCallbacks(db *gorm.DB, config *Config) {
 	enableTransaction := func(db *gorm.DB) bool {
 		return !db.SkipDefaultTransaction

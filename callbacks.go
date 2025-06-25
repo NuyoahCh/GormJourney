@@ -50,30 +50,37 @@ type callback struct {
 	processor *processor
 }
 
+// 创建回调。
 func (cs *callbacks) Create() *processor {
 	return cs.processors["create"]
 }
 
+// 查询回调。
 func (cs *callbacks) Query() *processor {
 	return cs.processors["query"]
 }
 
+// 更新回调。
 func (cs *callbacks) Update() *processor {
 	return cs.processors["update"]
 }
 
+// 删除回调。
 func (cs *callbacks) Delete() *processor {
 	return cs.processors["delete"]
 }
 
+// 行回调。
 func (cs *callbacks) Row() *processor {
 	return cs.processors["row"]
 }
 
+// 原始回调。
 func (cs *callbacks) Raw() *processor {
 	return cs.processors["raw"]
 }
 
+// 执行回调。
 func (p *processor) Execute(db *DB) *DB {
 	// call scopes
 	for len(db.Statement.scopes) > 0 {
@@ -154,6 +161,7 @@ func (p *processor) Execute(db *DB) *DB {
 	return db
 }
 
+// 获取回调。
 func (p *processor) Get(name string) func(*DB) {
 	for i := len(p.callbacks) - 1; i >= 0; i-- {
 		if v := p.callbacks[i]; v.name == name && !v.remove {
@@ -163,30 +171,37 @@ func (p *processor) Get(name string) func(*DB) {
 	return nil
 }
 
+// 在回调之前执行。
 func (p *processor) Before(name string) *callback {
 	return &callback{before: name, processor: p}
 }
 
+// 在回调之后执行。
 func (p *processor) After(name string) *callback {
 	return &callback{after: name, processor: p}
 }
 
+// 匹配回调。
 func (p *processor) Match(fc func(*DB) bool) *callback {
 	return &callback{match: fc, processor: p}
 }
 
+// 注册回调。
 func (p *processor) Register(name string, fn func(*DB)) error {
 	return (&callback{processor: p}).Register(name, fn)
 }
 
+// 删除回调。
 func (p *processor) Remove(name string) error {
 	return (&callback{processor: p}).Remove(name)
 }
 
+// 替换回调。
 func (p *processor) Replace(name string, fn func(*DB)) error {
 	return (&callback{processor: p}).Replace(name, fn)
 }
 
+// 编译回调。
 func (p *processor) compile() (err error) {
 	var callbacks []*callback
 	removedMap := map[string]bool{}
@@ -210,16 +225,19 @@ func (p *processor) compile() (err error) {
 	return
 }
 
+// 在回调之前执行。
 func (c *callback) Before(name string) *callback {
 	c.before = name
 	return c
 }
 
+// 在回调之后执行。
 func (c *callback) After(name string) *callback {
 	c.after = name
 	return c
 }
 
+// 注册回调。
 func (c *callback) Register(name string, fn func(*DB)) error {
 	c.name = name
 	c.handler = fn
@@ -227,6 +245,7 @@ func (c *callback) Register(name string, fn func(*DB)) error {
 	return c.processor.compile()
 }
 
+// 删除回调。
 func (c *callback) Remove(name string) error {
 	c.processor.db.Logger.Warn(context.Background(), "removing callback `%s` from %s\n", name, utils.FileWithLineNum())
 	c.name = name
@@ -235,6 +254,7 @@ func (c *callback) Remove(name string) error {
 	return c.processor.compile()
 }
 
+// 替换回调。
 func (c *callback) Replace(name string, fn func(*DB)) error {
 	c.processor.db.Logger.Info(context.Background(), "replacing callback `%s` from %s\n", name, utils.FileWithLineNum())
 	c.name = name
@@ -244,7 +264,7 @@ func (c *callback) Replace(name string, fn func(*DB)) error {
 	return c.processor.compile()
 }
 
-// getRIndex get right index from string slice
+// 获取右索引。
 func getRIndex(strs []string, str string) int {
 	for i := len(strs) - 1; i >= 0; i-- {
 		if strs[i] == str {
@@ -254,6 +274,7 @@ func getRIndex(strs []string, str string) int {
 	return -1
 }
 
+// 排序回调。
 func sortCallbacks(cs []*callback) (fns []func(*DB), err error) {
 	var (
 		names, sorted []string
@@ -350,6 +371,7 @@ func sortCallbacks(cs []*callback) (fns []func(*DB), err error) {
 	return
 }
 
+// 删除回调。
 func removeCallbacks(cs []*callback, nameMap map[string]bool) []*callback {
 	callbacks := make([]*callback, 0, len(cs))
 	for _, callback := range cs {

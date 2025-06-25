@@ -12,6 +12,7 @@ import (
 )
 
 // BeforeCreate before create hooks
+// 在创建之前执行的钩子函数。
 func BeforeCreate(db *gorm.DB) {
 	if db.Error == nil && db.Statement.Schema != nil && !db.Statement.SkipHooks && (db.Statement.Schema.BeforeSave || db.Statement.Schema.BeforeCreate) {
 		callMethod(db, func(value interface{}, tx *gorm.DB) (called bool) {
@@ -34,14 +35,18 @@ func BeforeCreate(db *gorm.DB) {
 }
 
 // Create create hook
+// 创建钩子函数。
 func Create(config *Config) func(db *gorm.DB) {
+	// 支持返回
 	supportReturning := utils.Contains(config.CreateClauses, "RETURNING")
 
 	return func(db *gorm.DB) {
+		// 如果存在错误，则返回。
 		if db.Error != nil {
 			return
 		}
 
+		// 如果存在模式，则添加模式。
 		if db.Statement.Schema != nil {
 			if !db.Statement.Unscoped {
 				for _, c := range db.Statement.Schema.CreateClauses {
@@ -49,6 +54,7 @@ func Create(config *Config) func(db *gorm.DB) {
 				}
 			}
 
+			// 如果支持返回，则添加返回。
 			if supportReturning && len(db.Statement.Schema.FieldsWithDefaultDBValue) > 0 {
 				if _, ok := db.Statement.Clauses["RETURNING"]; !ok {
 					fromColumns := make([]clause.Column, 0, len(db.Statement.Schema.FieldsWithDefaultDBValue))
@@ -60,6 +66,7 @@ func Create(config *Config) func(db *gorm.DB) {
 			}
 		}
 
+		// 如果SQL长度为0，则添加SQL。
 		if db.Statement.SQL.Len() == 0 {
 			db.Statement.SQL.Grow(180)
 			db.Statement.AddClauseIfNotExists(clause.Insert{})
@@ -68,11 +75,13 @@ func Create(config *Config) func(db *gorm.DB) {
 			db.Statement.Build(db.Statement.BuildClauses...)
 		}
 
+		// 如果不是DryRun，则返回。
 		isDryRun := !db.DryRun && db.Error == nil
 		if !isDryRun {
 			return
 		}
 
+		// 如果支持返回，则返回。
 		ok, mode := hasReturning(db, supportReturning)
 		if ok {
 			if c, ok := db.Statement.Clauses["ON CONFLICT"]; ok {
@@ -81,6 +90,7 @@ func Create(config *Config) func(db *gorm.DB) {
 				}
 			}
 
+			// 执行SQL。
 			rows, err := db.Statement.ConnPool.QueryContext(
 				db.Statement.Context, db.Statement.SQL.String(), db.Statement.Vars...,
 			)
@@ -98,6 +108,7 @@ func Create(config *Config) func(db *gorm.DB) {
 			return
 		}
 
+		// 执行SQL。
 		result, err := db.Statement.ConnPool.ExecContext(
 			db.Statement.Context, db.Statement.SQL.String(), db.Statement.Vars...,
 		)
@@ -106,6 +117,7 @@ func Create(config *Config) func(db *gorm.DB) {
 			return
 		}
 
+		// 获取受影响的行数。
 		db.RowsAffected, _ = result.RowsAffected()
 
 		if db.Statement.Result != nil {
@@ -113,18 +125,22 @@ func Create(config *Config) func(db *gorm.DB) {
 			db.Statement.Result.RowsAffected = db.RowsAffected
 		}
 
+		// 如果受影响的行数为0，则返回。
 		if db.RowsAffected == 0 {
 			return
 		}
 
+		// 获取主键字段。
 		var (
 			pkField     *schema.Field
 			pkFieldName = "@id"
 		)
 
+		// 获取插入ID。
 		insertID, err := result.LastInsertId()
 		insertOk := err == nil && insertID > 0
 
+		// 如果插入ID不正确，则返回。
 		if !insertOk {
 			if !supportReturning {
 				db.AddError(err)
@@ -132,6 +148,7 @@ func Create(config *Config) func(db *gorm.DB) {
 			return
 		}
 
+		// 如果存在模式，则添加模式。
 		if db.Statement.Schema != nil {
 			if db.Statement.Schema.PrioritizedPrimaryField == nil || !db.Statement.Schema.PrioritizedPrimaryField.HasDefaultValue {
 				return
@@ -142,6 +159,8 @@ func Create(config *Config) func(db *gorm.DB) {
 
 		// append @id column with value for auto-increment primary key
 		// the @id value is correct, when: 1. without setting auto-increment primary key, 2. database AutoIncrementIncrement = 1
+		// @id 值正确，当：1. 没有设置自动递增主键，2. 数据库 AutoIncrementIncrement = 1 时。
+		// 添加 @id 列的值，用于自动递增主键。
 		switch values := db.Statement.Dest.(type) {
 		case map[string]interface{}:
 			values[pkFieldName] = insertID

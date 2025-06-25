@@ -115,6 +115,7 @@ type DB struct {
 }
 
 // Session session config when create session with Session() method
+// 会话配置，当使用 Session() 方法创建会话时使用。
 type Session struct {
 	DryRun                   bool
 	PrepareStmt              bool
