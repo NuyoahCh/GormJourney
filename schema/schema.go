@@ -30,6 +30,7 @@ const (
 // ErrUnsupportedDataType unsupported data type
 var ErrUnsupportedDataType = errors.New("unsupported data type")
 
+// Schema 结构体，用于存储模型相关的信息。
 type Schema struct {
 	Name                      string
 	ModelType                 reflect.Type
@@ -114,6 +115,7 @@ type TablerWithNamer interface {
 }
 
 // Parse get data type from dialector
+// 解析数据类型。
 func Parse(dest interface{}, cacheStore *sync.Map, namer Namer) (*Schema, error) {
 	return ParseWithSpecialTableName(dest, cacheStore, namer, "")
 }
