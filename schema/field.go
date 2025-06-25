@@ -51,7 +51,7 @@ const (
 
 const DefaultAutoIncrementIncrement int64 = 1
 
-// Field is the representation of model schema's field
+// Field 结构体，用于表示模型模式的字段。
 type Field struct {
 	Name                   string
 	DBName                 string

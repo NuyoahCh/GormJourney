@@ -100,7 +100,7 @@ type Option interface {
 	AfterInitialize(*DB) error
 }
 
-// DB GORM DB definition
+// DB GORM DB定义。
 type DB struct {
 	// 配置信息
 	*Config
@@ -134,7 +134,7 @@ type Session struct {
 	CreateBatchSize          int
 }
 
-// Open initialize db session based on dialector
+// Open 初始化数据库会话。
 func Open(dialector Dialector, opts ...Option) (db *DB, err error) {
 	config := &Config{}
 

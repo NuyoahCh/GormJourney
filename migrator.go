@@ -64,7 +64,7 @@ type TableType interface {
 	Comment() (comment string, ok bool)
 }
 
-// Migrator migrator interface
+// Migrator 迁移器接口。
 type Migrator interface {
 	// AutoMigrate
 	AutoMigrate(dst ...interface{}) error

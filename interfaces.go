@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// Dialector GORM database dialector
+// Dialector GORM数据库驱动器接口。
 type Dialector interface {
 	Name() string
 	Initialize(*DB) error
@@ -20,17 +20,18 @@ type Dialector interface {
 	Explain(sql string, vars ...interface{}) string
 }
 
-// Plugin GORM plugin interface
+// Plugin GORM插件接口。
 type Plugin interface {
 	Name() string
 	Initialize(*DB) error
 }
 
+// ParamsFilter 参数过滤器接口。
 type ParamsFilter interface {
 	ParamsFilter(ctx context.Context, sql string, params ...interface{}) (string, []interface{})
 }
 
-// ConnPool db conns pool interface
+// ConnPool 数据库连接池接口。
 type ConnPool interface {
 	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
@@ -38,46 +39,46 @@ type ConnPool interface {
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }
 
-// SavePointerDialectorInterface save pointer interface
+// SavePointerDialectorInterface 保存指针接口。
 type SavePointerDialectorInterface interface {
 	SavePoint(tx *DB, name string) error
 	RollbackTo(tx *DB, name string) error
 }
 
-// TxBeginner tx beginner
+// TxBeginner 事务开始器接口。
 type TxBeginner interface {
 	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 }
 
-// ConnPoolBeginner conn pool beginner
+// ConnPoolBeginner 数据库连接池开始器接口。
 type ConnPoolBeginner interface {
 	BeginTx(ctx context.Context, opts *sql.TxOptions) (ConnPool, error)
 }
 
-// TxCommitter tx committer
+// TxCommitter 事务提交器接口。
 type TxCommitter interface {
 	Commit() error
 	Rollback() error
 }
 
-// Tx sql.Tx interface
+// Tx sql.Tx接口。
 type Tx interface {
 	ConnPool
 	TxCommitter
 	StmtContext(ctx context.Context, stmt *sql.Stmt) *sql.Stmt
 }
 
-// Valuer gorm valuer interface
+// Valuer GORM值器接口。
 type Valuer interface {
 	GormValue(context.Context, *DB) clause.Expr
 }
 
-// GetDBConnector SQL db connector
+// GetDBConnector SQL数据库连接器接口。
 type GetDBConnector interface {
 	GetDBConn() (*sql.DB, error)
 }
 
-// Rows rows interface
+// Rows 行接口。
 type Rows interface {
 	Columns() ([]string, error)
 	ColumnTypes() ([]*sql.ColumnType, error)
@@ -87,6 +88,7 @@ type Rows interface {
 	Close() error
 }
 
+// ErrorTranslator 错误翻译器接口。
 type ErrorTranslator interface {
 	Translate(err error) error
 }
