@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+// Gorm 的主入口，定义了 DB 结构体和核心方法。
 // for Config.cacheStore store PreparedStmtDB key
 const preparedStmtDBKey = "preparedStmt"
 
@@ -101,11 +102,16 @@ type Option interface {
 
 // DB GORM DB definition
 type DB struct {
+	// 配置信息
 	*Config
-	Error        error
+	// 错误信息
+	Error error
+	// 受影响的行数
 	RowsAffected int64
-	Statement    *Statement
-	clone        int
+	// 语句
+	Statement *Statement
+	// 克隆次数
+	clone int
 }
 
 // Session session config when create session with Session() method

@@ -12,6 +12,8 @@ import (
 	"gorm.io/gorm/utils"
 )
 
+// 各种生命周期回调（如 create、update、delete、query 等）。
+
 func initializeCallbacks(db *DB) *callbacks {
 	return &callbacks{
 		processors: map[string]*processor{
