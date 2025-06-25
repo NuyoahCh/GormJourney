@@ -9,17 +9,17 @@ const (
 	OrWithSpace  = " OR "
 )
 
-// Where where clause
+// Where 结构体，用于存储WHERE子句的表达式。
 type Where struct {
 	Exprs []Expression
 }
 
-// Name where clause name
+// Name 获取WHERE子句的名称。
 func (where Where) Name() string {
 	return "WHERE"
 }
 
-// Build build where clause
+// Build 构建WHERE子句的SQL。
 func (where Where) Build(builder Builder) {
 	if len(where.Exprs) == 1 {
 		if andCondition, ok := where.Exprs[0].(AndConditions); ok {
@@ -27,7 +27,7 @@ func (where Where) Build(builder Builder) {
 		}
 	}
 
-	// Switch position if the first query expression is a single Or condition
+	// 如果第一个查询表达式是单个Or条件，则交换位置。
 	for idx, expr := range where.Exprs {
 		if v, ok := expr.(OrConditions); !ok || len(v.Exprs) > 1 {
 			if idx != 0 {
@@ -40,6 +40,7 @@ func (where Where) Build(builder Builder) {
 	buildExprs(where.Exprs, builder, AndWithSpace)
 }
 
+// buildExprs 构建表达式。
 func buildExprs(exprs []Expression, builder Builder, joinCond string) {
 	wrapInParentheses := false
 
@@ -100,6 +101,7 @@ func (where Where) MergeClause(clause *Clause) {
 	clause.Expression = where
 }
 
+// And 构建AND条件。
 func And(exprs ...Expression) Expression {
 	if len(exprs) == 0 {
 		return nil
@@ -114,10 +116,12 @@ func And(exprs ...Expression) Expression {
 	return AndConditions{Exprs: exprs}
 }
 
+// AndConditions 结构体，用于存储AND条件。
 type AndConditions struct {
 	Exprs []Expression
 }
 
+// Build 构建AND条件的SQL。
 func (and AndConditions) Build(builder Builder) {
 	if len(and.Exprs) > 1 {
 		builder.WriteByte('(')
@@ -128,6 +132,7 @@ func (and AndConditions) Build(builder Builder) {
 	}
 }
 
+// Or 构建OR条件。
 func Or(exprs ...Expression) Expression {
 	if len(exprs) == 0 {
 		return nil
@@ -135,10 +140,12 @@ func Or(exprs ...Expression) Expression {
 	return OrConditions{Exprs: exprs}
 }
 
+// OrConditions 结构体，用于存储OR条件。
 type OrConditions struct {
 	Exprs []Expression
 }
 
+// Build 构建OR条件的SQL。
 func (or OrConditions) Build(builder Builder) {
 	if len(or.Exprs) > 1 {
 		builder.WriteByte('(')
@@ -149,6 +156,7 @@ func (or OrConditions) Build(builder Builder) {
 	}
 }
 
+// Not 构建NOT条件。
 func Not(exprs ...Expression) Expression {
 	if len(exprs) == 0 {
 		return nil
@@ -161,10 +169,12 @@ func Not(exprs ...Expression) Expression {
 	return NotConditions{Exprs: exprs}
 }
 
+// NotConditions 结构体，用于存储NOT条件。
 type NotConditions struct {
 	Exprs []Expression
 }
 
+// Build 构建NOT条件的SQL。
 func (not NotConditions) Build(builder Builder) {
 	anyNegationBuilder := false
 	for _, c := range not.Exprs {

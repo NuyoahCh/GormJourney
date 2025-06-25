@@ -1,21 +1,23 @@
 package clause
 
 // Interface clause interface
+// Interface 接口，用于定义Clause的通用行为。
 type Interface interface {
 	Name() string
 	Build(Builder)
 	MergeClause(*Clause)
 }
 
-// ClauseBuilder clause builder, allows to customize how to build clause
+// ClauseBuilder 结构体，用于构建Clause。
 type ClauseBuilder func(Clause, Builder)
 
+// Writer 接口，用于写入字节和字符串。
 type Writer interface {
 	WriteByte(byte) error
 	WriteString(string) (int, error)
 }
 
-// Builder builder interface
+// Builder 接口，用于构建Clause。
 type Builder interface {
 	Writer
 	WriteQuoted(field interface{})
